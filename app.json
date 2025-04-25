@@ -1,28 +1,42 @@
 {
   "expo": {
-    "name": "grocery-app",
+    "name": "Grocery-app",
     "slug": "grocery-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/assets/images/logo.jpeg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "./src/assets/fonts/*"
+    ],
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./src/assets/images/logo.jpeg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.saptak2smooth.groceryapp"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./src/assets/images/logo.jpeg",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.saptak2smooth.groceryapp"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./src/assets/images/logo.jpeg"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c17c3476-2fb9-4538-b47f-db2cd978c505"
+      }
+    },
+    "owner": "saptak2smooth",
+    "plugins": [
+      "expo-font"
+    ]
   }
 }
