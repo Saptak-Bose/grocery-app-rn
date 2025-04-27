@@ -1,3 +1,5 @@
+
+
 export enum Colors {
   primary = "#FDCC00",
   primary_light = "#ffe141",
@@ -8,11 +10,11 @@ export enum Colors {
   backgroundSecondary = "#f5f6fb",
 }
 export enum Fonts {
-  Regular = "Okra-Regular",
-  Medium = "Okra-Medium",
-  Light = "Okra-MediumLight",
-  SemiBold = "Okra-Bold",
-  Bold = "Okra-ExtraBold",
+  Regular = "Regular",
+  Medium = "Medium",
+  Light = "MediumLight",
+  SemiBold = "Bold",
+  Bold = "ExtraBold",
 }
 
 export const lightColors = [
