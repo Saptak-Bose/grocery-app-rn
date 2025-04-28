@@ -7,9 +7,7 @@
     "icon": "./src/assets/images/logo.jpeg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "assetBundlePatterns": [
-      "./src/assets/fonts/*"
-    ],
+    "assetBundlePatterns": ["./src/assets/fonts/*"],
     "splash": {
       "image": "./src/assets/images/logo.jpeg",
       "resizeMode": "contain",
@@ -17,7 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.saptak2smooth.groceryapp"
+      "bundleIdentifier": "com.saptak2smooth.groceryapp",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -37,7 +38,22 @@
     "owner": "saptak2smooth",
     "plugins": [
       "expo-font",
-      "expo-secure-store"
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Allow Grocery Delivery App to access your Face ID biometric data."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Grocery Delivery App to use your location.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ]
     ]
   }
 }

@@ -1,10 +1,18 @@
-import { View, Text } from "react-native";
+import { View, StyleSheet } from "react-native";
+
 type Props = {};
+
 const ProductDashboard = (props: Props) => {
-  return (
-    <View>
-      <Text>ProductDashboard</Text>
-    </View>
-  );
+  return <View></View>;
 };
+
 export default ProductDashboard;
+
+const styles = StyleSheet.create({
+  panelContainer: {
+    flex: 1,
+  },
+  transparent: {
+    backgroundColor: "transparent",
+  },
+});

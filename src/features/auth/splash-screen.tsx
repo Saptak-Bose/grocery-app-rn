@@ -1,20 +1,110 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, Alert } from "react-native";
 import { Colors } from "../../utils/constants";
 import Logo from "../../assets/images/logo.jpeg";
 import { screenHeight, screenWidth } from "../../utils/scaling";
 import { useEffect } from "react";
-import { navigate } from "../../utils/navigationUtils";
+import { resetAndNavigate } from "../../utils/navigationUtils";
+import * as Location from "expo-location";
+import * as TaskManager from "expo-task-manager";
+import { useAuthStore } from "../../state/auth-store";
+import { tokenStorage } from "../../state/storage";
+import { jwtDecode } from "jwt-decode";
+import { refetchUser, refresh_tokens } from "../../services/auth-service";
 
 type Props = {};
 
+type DecodedToken = {
+  exp: number;
+};
+
+const TASK_NAME = "BG_LOCATION_TASK";
+
+TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  console.log("BG locations:", (data as any).locations);
+});
+
+const startBackgroundLocation = async () => {
+  await Location.startLocationUpdatesAsync(TASK_NAME, {
+    accuracy: Location.Accuracy.Highest,
+    timeInterval: 5000,
+    distanceInterval: 0,
+    pausesUpdatesAutomatically: false,
+    showsBackgroundLocationIndicator: false,
+    foregroundService: {
+      notificationTitle: "Location Permissions",
+      notificationBody:
+        "We need your location permission to provide you with better shopping experience...",
+    },
+  });
+};
+
 const SplashScreen = (props: Props) => {
+  const { setUser, user } = useAuthStore();
+
+  const tokenCheck = async () => {
+    const accesstoken = (await tokenStorage.getItem("accesstoken")) as string;
+    const refreshtoken = (await tokenStorage.getItem("refreshtoken")) as string;
+
+    if (accesstoken) {
+      const decodedAccessToken = jwtDecode<DecodedToken>(accesstoken);
+      const decodedRefreshToken = jwtDecode<DecodedToken>(refreshtoken);
+      const currentTime = Date.now() / 1000;
+
+      if (decodedRefreshToken?.exp < currentTime) {
+        resetAndNavigate("CustomerLogin");
+        Alert.alert("Session expired", "Please login again...");
+
+        return false;
+      }
+
+      if (decodedAccessToken?.exp < currentTime) {
+        try {
+          refresh_tokens();
+          await refetchUser(setUser);
+        } catch (error) {
+          console.log(error);
+          Alert.alert("There was an refreshing the token...");
+
+          return false;
+        }
+      }
+
+      if (user?.role === "Customer") {
+        resetAndNavigate("ProductDashboard");
+      } else {
+        resetAndNavigate("DeliveryDashboard");
+      }
+
+      return true;
+    }
+
+    resetAndNavigate("CustomerLogin");
+    return false;
+  };
+
   useEffect(() => {
-    const navigateUser = async () => {
+    startBackgroundLocation();
+  }, []);
+
+  useEffect(() => {
+    const initialStartup = async () => {
       try {
-        navigate("CustomerLogin");
-      } catch (error) {}
+        Location.requestBackgroundPermissionsAsync();
+        Location.requestForegroundPermissionsAsync();
+        tokenCheck();
+      } catch (error) {
+        Alert.alert(
+          "Sorry we need your location permission to provide you with better shopping experience..."
+        );
+      }
     };
-    const timeoutId = setTimeout(navigateUser, 4000);
+
+    const timeoutId = setTimeout(initialStartup, 4000);
 
     return () => clearTimeout(timeoutId);
   }, []);

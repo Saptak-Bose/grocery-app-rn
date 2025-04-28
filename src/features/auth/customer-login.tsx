@@ -46,18 +46,20 @@ const CustomerLogin = (props: Props) => {
   const keyboardOffsetHeight = useKeyboardOffsetHeight();
 
   useEffect(() => {
-    if (keyboardOffsetHeight === 0) {
-      Animated.timing(animatedValue, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(animatedValue, {
-        toValue: -keyboardOffsetHeight * 0.84,
-        duration: 1000,
-        useNativeDriver: true,
-      }).start();
+    if (Platform.OS === "ios") {
+      if (keyboardOffsetHeight === 0) {
+        Animated.timing(animatedValue, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }).start();
+      } else {
+        Animated.timing(animatedValue, {
+          toValue: -keyboardOffsetHeight * 0.84,
+          duration: 1000,
+          useNativeDriver: true,
+        }).start();
+      }
     }
   }, [keyboardOffsetHeight]);
 

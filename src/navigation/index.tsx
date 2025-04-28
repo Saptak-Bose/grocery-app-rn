@@ -6,6 +6,7 @@ import SplashScreen from "../features/auth/splash-screen";
 import DeliveryLogin from "../features/auth/delivery-login";
 import CustomerLogin from "../features/auth/customer-login";
 import ProductDashboard from "../features/dashboard/product-dashboard";
+import DeliveryDashboard from "../features/delivery/delivery-dashboard";
 
 type Props = {};
 
@@ -22,6 +23,7 @@ const Navigation = (props: Props) => {
       >
         <Stack.Screen name="SplashScreen" component={SplashScreen} />
         <Stack.Screen name="ProductDashboard" component={ProductDashboard} />
+        <Stack.Screen name="DeliveryDashboard" component={DeliveryDashboard} />
         <Stack.Screen
           options={{
             animation: "fade",
