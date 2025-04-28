@@ -3,7 +3,7 @@ import { Colors } from "../../utils/constants";
 import Logo from "../../assets/images/logo.jpeg";
 import { screenHeight, screenWidth } from "../../utils/scaling";
 import { useEffect } from "react";
-import { resetAndNavigate } from "../../utils/navigationUtils";
+import { navigate, resetAndNavigate } from "../../utils/navigationUtils";
 import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import { useAuthStore } from "../../state/auth-store";
@@ -30,8 +30,8 @@ TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
 
 const startBackgroundLocation = async () => {
   await Location.startLocationUpdatesAsync(TASK_NAME, {
-    accuracy: Location.Accuracy.Highest,
-    timeInterval: 5000,
+    accuracy: Location.Accuracy.Balanced,
+    timeInterval: 15000,
     distanceInterval: 0,
     pausesUpdatesAutomatically: false,
     showsBackgroundLocationIndicator: false,
@@ -47,12 +47,12 @@ const SplashScreen = (props: Props) => {
   const { setUser, user } = useAuthStore();
 
   const tokenCheck = async () => {
-    const accesstoken = (await tokenStorage.getItem("accesstoken")) as string;
-    const refreshtoken = (await tokenStorage.getItem("refreshtoken")) as string;
+    const accessToken = (await tokenStorage.getItem("accessToken")) as string;
+    const refreshToken = (await tokenStorage.getItem("refreshToken")) as string;
 
-    if (accesstoken) {
-      const decodedAccessToken = jwtDecode<DecodedToken>(accesstoken);
-      const decodedRefreshToken = jwtDecode<DecodedToken>(refreshtoken);
+    if (accessToken) {
+      const decodedAccessToken = jwtDecode<DecodedToken>(accessToken);
+      const decodedRefreshToken = jwtDecode<DecodedToken>(refreshToken);
       const currentTime = Date.now() / 1000;
 
       if (decodedRefreshToken?.exp < currentTime) {
@@ -88,15 +88,12 @@ const SplashScreen = (props: Props) => {
   };
 
   useEffect(() => {
-    startBackgroundLocation();
-  }, []);
-
-  useEffect(() => {
     const initialStartup = async () => {
       try {
-        Location.requestBackgroundPermissionsAsync();
-        Location.requestForegroundPermissionsAsync();
+        await Location.requestBackgroundPermissionsAsync();
+        await Location.requestForegroundPermissionsAsync();
         tokenCheck();
+        startBackgroundLocation();
       } catch (error) {
         Alert.alert(
           "Sorry we need your location permission to provide you with better shopping experience..."
