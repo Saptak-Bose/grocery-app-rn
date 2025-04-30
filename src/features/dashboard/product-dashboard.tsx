@@ -1,10 +1,32 @@
-import { View, StyleSheet, Platform } from "react-native";
+import {
+  StyleSheet,
+  Platform,
+  Animated as RNAnimated,
+  TouchableOpacity,
+} from "react-native";
 import { NoticeHeight, screenHeight } from "../../utils/scaling";
-import { withCollapsibleContext } from "@r0b0t3d/react-native-collapsible";
-import { useEffect } from "react";
+import {
+  CollapsibleContainer,
+  CollapsibleHeaderContainer,
+  useCollapsibleContext,
+  withCollapsibleContext,
+} from "@r0b0t3d/react-native-collapsible";
+import { useEffect, useRef } from "react";
 import * as Location from "expo-location";
 import { reverseGeocode } from "../../services/map-service";
 import { useAuthStore } from "../../state/auth-store";
+import NoticeAnimation from "./notice-animation";
+import Visuals from "./visuals";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+import { Ionicons } from "@expo/vector-icons";
+import { RFValue } from "react-native-responsive-fontsize";
+import CustomText from "../../components/ui/custom-text";
+import { Fonts } from "../../utils/constants";
+import AnimatedHeader from "./animated-header";
 
 type Props = {};
 
@@ -12,6 +34,47 @@ const NOTICE_HEIGHT = -(NoticeHeight + 12);
 
 const ProductDashboard = (props: Props) => {
   const { user, setUser } = useAuthStore();
+  const noticePosition = useRef(new RNAnimated.Value(NOTICE_HEIGHT)).current;
+  const { expand, scrollY } = useCollapsibleContext();
+  const previousScroll = useRef<number>(0);
+
+  const backToTopStyle = useAnimatedStyle(() => {
+    const isScrollingUp =
+      scrollY.value < previousScroll.current && scrollY.value > 180;
+    const opacity = withTiming(isScrollingUp ? 1 : 0, {
+      duration: 300,
+    });
+    const translateY = withTiming(isScrollingUp ? 0 : 10, {
+      duration: 300,
+    });
+
+    previousScroll.current = scrollY.value;
+
+    return {
+      opacity,
+      transform: [
+        {
+          translateY,
+        },
+      ],
+    };
+  });
+
+  const slideUp = () => {
+    RNAnimated.timing(noticePosition, {
+      toValue: NOTICE_HEIGHT,
+      duration: 1200,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const slideDown = () => {
+    RNAnimated.timing(noticePosition, {
+      toValue: 0,
+      duration: 1200,
+      useNativeDriver: false,
+    }).start();
+  };
 
   useEffect(() => {
     const updateUser = async () => {
@@ -24,7 +87,53 @@ const ProductDashboard = (props: Props) => {
     updateUser();
   }, []);
 
-  return <View></View>;
+  return (
+    <NoticeAnimation noticePosition={noticePosition}>
+      <>
+        <Visuals />
+        <SafeAreaView />
+        <Animated.View style={[styles.backToTopButton, backToTopStyle]}>
+          <TouchableOpacity
+            onPress={() => {
+              scrollY.value = 0;
+              expand();
+            }}
+            style={{ flexDirection: "row", alignItems: "center", gap: 6 }}
+          >
+            <Ionicons
+              name="arrow-up-circle-outline"
+              color="white"
+              size={RFValue(12)}
+            />
+            <CustomText
+              variant="h9"
+              style={{ color: "white" }}
+              fontFamily={Fonts.SemiBold}
+            >
+              Back to Top
+            </CustomText>
+          </TouchableOpacity>
+        </Animated.View>
+        <CollapsibleContainer style={styles.panelContainer}>
+          <CollapsibleHeaderContainer
+            containerStyle={styles.transparent}
+          >
+            <AnimatedHeader
+              showNotice={() => {
+                slideDown();
+
+                const timeoutId = setTimeout(() => {
+                  slideUp();
+                }, 3500);
+
+                return () => clearTimeout(timeoutId);
+              }}
+            />
+          </CollapsibleHeaderContainer>
+        </CollapsibleContainer>
+      </>
+    </NoticeAnimation>
+  );
 };
 
 export default withCollapsibleContext(ProductDashboard);
