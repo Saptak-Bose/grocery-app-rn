@@ -1,13 +1,15 @@
 import {
   StyleSheet,
   Platform,
-  Animated as RNAnimated,
+  Animated,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { NoticeHeight, screenHeight } from "../../utils/scaling";
 import {
   CollapsibleContainer,
   CollapsibleHeaderContainer,
+  CollapsibleScrollView,
   useCollapsibleContext,
   withCollapsibleContext,
 } from "@r0b0t3d/react-native-collapsible";
@@ -18,15 +20,14 @@ import { useAuthStore } from "../../state/auth-store";
 import NoticeAnimation from "./notice-animation";
 import Visuals from "./visuals";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
+import { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { RFValue } from "react-native-responsive-fontsize";
 import CustomText from "../../components/ui/custom-text";
 import { Fonts } from "../../utils/constants";
 import AnimatedHeader from "./animated-header";
+import Content from "../../components/dashboard/content";
+import StickySearchBar from "./sticky-search-bar";
 
 type Props = {};
 
@@ -34,7 +35,7 @@ const NOTICE_HEIGHT = -(NoticeHeight + 12);
 
 const ProductDashboard = (props: Props) => {
   const { user, setUser } = useAuthStore();
-  const noticePosition = useRef(new RNAnimated.Value(NOTICE_HEIGHT)).current;
+  const noticePosition = useRef(new Animated.Value(NOTICE_HEIGHT)).current;
   const { expand, scrollY } = useCollapsibleContext();
   const previousScroll = useRef<number>(0);
 
@@ -61,7 +62,7 @@ const ProductDashboard = (props: Props) => {
   });
 
   const slideUp = () => {
-    RNAnimated.timing(noticePosition, {
+    Animated.timing(noticePosition, {
       toValue: NOTICE_HEIGHT,
       duration: 1200,
       useNativeDriver: false,
@@ -69,7 +70,7 @@ const ProductDashboard = (props: Props) => {
   };
 
   const slideDown = () => {
-    RNAnimated.timing(noticePosition, {
+    Animated.timing(noticePosition, {
       toValue: 0,
       duration: 1200,
       useNativeDriver: false,
@@ -92,7 +93,7 @@ const ProductDashboard = (props: Props) => {
       <>
         <Visuals />
         <SafeAreaView />
-        <Animated.View style={[styles.backToTopButton, backToTopStyle]}>
+        {/* <Animated.View style={[styles.backToTopButton, backToTopStyle]}>
           <TouchableOpacity
             onPress={() => {
               scrollY.value = 0;
@@ -113,11 +114,9 @@ const ProductDashboard = (props: Props) => {
               Back to Top
             </CustomText>
           </TouchableOpacity>
-        </Animated.View>
+        </Animated.View> */}
         <CollapsibleContainer style={styles.panelContainer}>
-          <CollapsibleHeaderContainer
-            containerStyle={styles.transparent}
-          >
+          <CollapsibleHeaderContainer containerStyle={styles.transparent}>
             <AnimatedHeader
               showNotice={() => {
                 slideDown();
@@ -129,7 +128,30 @@ const ProductDashboard = (props: Props) => {
                 return () => clearTimeout(timeoutId);
               }}
             />
+            <StickySearchBar />
           </CollapsibleHeaderContainer>
+          <CollapsibleScrollView
+            nestedScrollEnabled
+            style={styles.panelContainer}
+            showsVerticalScrollIndicator={false}
+          >
+            <Content />
+            <View style={{ backgroundColor: "#f8f8f8", padding: 20 }}>
+              <CustomText
+                fontSize={RFValue(32)}
+                fontFamily={Fonts.Bold}
+                style={{ opacity: 0.2 }}
+              >
+                Grocery Delivery App🛒
+              </CustomText>
+              <CustomText
+                fontFamily={Fonts.Bold}
+                style={{ marginTop: 10, paddingBottom: 100, opacity: 0.2 }}
+              >
+                Developed by 🤍 Saptak Bose
+              </CustomText>
+            </View>
+          </CollapsibleScrollView>
         </CollapsibleContainer>
       </>
     </NoticeAnimation>
